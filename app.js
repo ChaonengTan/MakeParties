@@ -18,6 +18,7 @@ app.use(methodOverride('_method'))
 // other requires/imports
 const models = require('./db/models');
 require('./controllers/events')(app, models);
+require('./controllers/rsvps')(app, models);
 
 // Use "main" as our default layout
 app.engine('handlebars', exphbs.engine({ defaultLayout: 'main', handlebars: allowInsecurePrototypeAccess(Handlebars) }));
@@ -53,13 +54,10 @@ app.post('/events', (req, res) => {
 
 // SHOW
 app.get('/events/:id', (req, res) => {
-    // Search for the event by its id that was passed in via req.params
-    models.Event.findByPk(req.params.id).then((event) => {
-      // If the id is for a valid event, show it
-      res.render('events-show', { event: event })
+    models.Event.findByPk(req.params.id, { include: [{ model: models.Rsvp }] }).then(event => {
+        res.render('events-show', { event: event });
     }).catch((err) => {
-      // if they id was for an event not in our db, log an error
-      console.log(err.message);
+        console.log(err.message);
     })
   })
 // EDIT
@@ -91,6 +89,15 @@ app.delete('/events/:id', (req, res) => {
       console.log(err);
     });
   })
+// CREATE
+app.post('/events/:eventId/rsvps', (req, res) => {
+    req.body.EventId = req.params.eventId;
+    models.Rsvp.create(req.body).then(rsvp => {
+      res.redirect(`/events/${req.params.eventId}`);
+    }).catch((err) => {
+        console.log(err)
+    });
+});
 
 // Choose a port to listen on
 const port = process.env.PORT || 3000;
