@@ -15,7 +15,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const methodOverride = require('method-override')
 app.use(methodOverride('_method'))
 
+// other requires/imports
 const models = require('./db/models');
+require('./controllers/events')(app, models);
 
 // Use "main" as our default layout
 app.engine('handlebars', exphbs.engine({ defaultLayout: 'main', handlebars: allowInsecurePrototypeAccess(Handlebars) }));
@@ -30,13 +32,6 @@ var events = [
     { title: "I am your second event", desc: "A great event that is super fun to look at and good", imgUrl: "https://img.purch.com/w/660/aHR0cDovL3d3dy5saXZlc2NpZW5jZS5jb20vaW1hZ2VzL2kvMDAwLzA4OC85MTEvb3JpZ2luYWwvZ29sZGVuLXJldHJpZXZlci1wdXBweS5qcGVn" },
     { title: "I am your third event", desc: "A great event that is super fun to look at and good", imgUrl: "https://img.purch.com/w/660/aHR0cDovL3d3dy5saXZlc2NpZW5jZS5jb20vaW1hZ2VzL2kvMDAwLzA4OC85MTEvb3JpZ2luYWwvZ29sZGVuLXJldHJpZXZlci1wdXBweS5qcGVn" }
 ]
-
-// Tell our app to send the "hello world" message to our home page
-app.get('/', (req, res) => {
-    models.Event.findAll({ order: [['createdAt', 'DESC']] }).then(events => {
-        res.render('events-index', { events: events });
-      })
-})
 
 // INDEX
 app.get('/events', (req, res) => {
