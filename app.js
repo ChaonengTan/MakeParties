@@ -11,6 +11,10 @@ const {allowInsecurePrototypeAccess} = require('@handlebars/allow-prototype-acce
 const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// method override
+const methodOverride = require('method-override')
+app.use(methodOverride('_method'))
+
 const models = require('./db/models');
 
 // Use "main" as our default layout
@@ -63,7 +67,26 @@ app.get('/events/:id', (req, res) => {
       console.log(err.message);
     })
   })
-
+// EDIT
+app.get('/events/:id/edit', (req, res) => {
+    models.Event.findByPk(req.params.id).then((event) => {
+      res.render('events-edit', { event: event });
+    }).catch((err) => {
+      console.log(err.message);
+    })
+  });
+// UPDATE
+app.put('/events/:id', (req, res) => {
+    models.Event.findByPk(req.params.id).then(event => {
+      event.update(req.body).then(event => {
+        res.redirect(`/events/${req.params.id}`);
+      }).catch((err) => {
+        console.log(err);
+      });
+    }).catch((err) => {
+      console.log(err);
+    });
+  });
 
 // Choose a port to listen on
 const port = process.env.PORT || 3000;
